@@ -1,0 +1,8 @@
+{
+  "plugin": {
+    "command": "gorest",
+    "module_name": "github.com/vision-cli/go-rest-server-plugin",
+    "plugin_name": "go-rest-server-plugin"
+  },
+  "project_name": "go-rest-server-plugin"
+}
