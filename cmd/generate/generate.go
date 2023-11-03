@@ -65,6 +65,9 @@ func run(cmd *cobra.Command, args []string) error {
 	if len(args) < 1 {
 		outputPath = "."
 		vPath = filepath.Join(wd, "vision.json")
+	} else if len(args) == 2 && args[1] == "." {
+		outputPath = args[0]
+		vPath = filepath.Join(wd, "vision.json")
 	} else if len(args) == 2 {
 		outputPath = args[0]
 		vPath = args[1]
