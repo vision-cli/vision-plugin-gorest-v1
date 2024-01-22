@@ -5,6 +5,7 @@ go 1.21.3
 require (
 	github.com/charmbracelet/log v0.2.5
 	github.com/spf13/cobra v1.7.0
+	gorm.io/gorm v1.25.5
 )
 
 require (
@@ -14,10 +15,9 @@ require (
 	github.com/jackc/pgx/v5 v5.4.3 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/text v0.13.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/text v0.14.0 // indirect
 	gorm.io/driver/mysql v1.4.7 // indirect
-	gorm.io/gorm v1.25.5 // indirect
 )
 
 require (
@@ -32,7 +32,7 @@ require (
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
-	golang.org/x/sys v0.13.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	gorm.io/datatypes v1.2.0
 	gorm.io/driver/postgres v1.5.4
 )
