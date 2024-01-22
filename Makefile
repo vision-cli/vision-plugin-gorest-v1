@@ -8,8 +8,7 @@ run:
 .PHONY: run
 
 install:
-	@go build -o vision-plugin-gorest-v1
-	@mv vision-plugin-gorest-v1 ${GOBIN}/vision-plugin-gorest-v1
+	@go install
 .PHONY: install
 
 build: test

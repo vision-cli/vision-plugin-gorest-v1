@@ -4,10 +4,10 @@ import (
 	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 
-	"github.com/vision-cli/go-rest-server-plugin/cmd/generate"
-	"github.com/vision-cli/go-rest-server-plugin/cmd/info"
-	"github.com/vision-cli/go-rest-server-plugin/cmd/initialise"
-	"github.com/vision-cli/go-rest-server-plugin/cmd/version"
+	"github.com/vision-cli/vision-plugin-gorest-v1/cmd/generate"
+	"github.com/vision-cli/vision-plugin-gorest-v1/cmd/info"
+	"github.com/vision-cli/vision-plugin-gorest-v1/cmd/initialise"
+	"github.com/vision-cli/vision-plugin-gorest-v1/cmd/version"
 )
 
 func init() {

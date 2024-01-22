@@ -1,4 +1,4 @@
-module github.com/vision-cli/go-rest-server-plugin
+module github.com/vision-cli/vision-plugin-gorest-v1
 
 go 1.21.3
 
