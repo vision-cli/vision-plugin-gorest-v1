@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"github.com/charmbracelet/log"
 	"github.com/spf13/cobra"
 
 	"github.com/vision-cli/vision-plugin-gorest-v1/cmd/generate"
@@ -18,12 +17,10 @@ func init() {
 }
 
 var rootCmd = &cobra.Command{
-	Use:                "plugin",
+	Use:                "gorest",
 	FParseErrWhitelist: cobra.FParseErrWhitelist{UnknownFlags: true},
 }
 
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
-		log.Error(err)
-	}
+	rootCmd.Execute()
 }

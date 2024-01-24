@@ -14,16 +14,20 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"github.com/vision-cli/go-rest-server-plugin/cmd/initialise"
+	"github.com/vision-cli/vision-plugin-gorest-v1/cmd/model"
 )
 
-//go:embed all:template
+const DEFAULT_OUTPUT_DIR = "./services"
+const TEMPLATE_DIR = "_template"
+
+//go:embed all:_template
 var templateFiles embed.FS
 
 var GenerateCmd = &cobra.Command{
-	Use:   "generate OUTPUT CONFIG",
-	Short: "generate the code from templates",
-	Long:  "generate code in the template files for the Plugin plugin using the values in the vision.json file",
+	Use:   "generate <output services folder> <config file>",
+	Short: "generate a REST service",
+	Long:  "generate a golang REST service in the services directory using the vision.json configuration",
+	Args:  cobra.NoArgs,
 	RunE:  generateAndCheck,
 }
 
@@ -32,7 +36,18 @@ type success struct {
 }
 
 type convertConfig struct {
-	PluginConfig initialise.PluginConfig `json:"config"`
+	PluginConfig model.PluginConfig `json:"config"`
+	GoVersion    string
+}
+
+type SinglePluginConfig struct {
+	PluginName string
+	ModuleName string
+	Command    string
+}
+
+type SingleConvertConfig struct {
+	PluginConfig SinglePluginConfig
 	GoVersion    string
 }
 
@@ -55,26 +70,13 @@ func generateAndCheck(cmd *cobra.Command, args []string) error {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	var vPath, outputPath string
-
 	wd, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("getting working directory: %w", err)
 	}
 
-	if len(args) < 1 {
-		outputPath = "."
-		vPath = filepath.Join(wd, "vision.json")
-	} else if len(args) == 2 && args[1] == "." {
-		outputPath = args[0]
-		vPath = filepath.Join(wd, "vision.json")
-	} else if len(args) == 2 {
-		outputPath = args[0]
-		vPath = args[1]
-	} else {
-		outputPath = args[0]
-		vPath = filepath.Join(wd, "vision.json")
-	}
+	outputPath := DEFAULT_OUTPUT_DIR
+	vPath := filepath.Join(wd, "vision.json")
 
 	// if outputPath dir does not exist, create dir
 	_, err = os.Stat(outputPath)
@@ -89,11 +91,26 @@ func run(cmd *cobra.Command, args []string) error {
 		return fmt.Errorf("opening vision.json: %w", err)
 	}
 
-	err = walkDirAndClone(wd, outputPath, vj)
-	if err != nil {
-		return fmt.Errorf("walking dir and cloning: %w", err)
+	for _, m := range vj.PluginConfig.ModuleNames {
+		// convert struct to use correct JSON tag
+		var convConf SingleConvertConfig
+		convConf.PluginConfig.PluginName = vj.PluginConfig.PluginName
+		convConf.PluginConfig.ModuleName = m
+		convConf.PluginConfig.Command = vj.PluginConfig.Command
+		convConf.GoVersion = vj.GoVersion
+
+		parts := strings.Split(m, "/")
+		singlePath := filepath.Join(outputPath, filepath.Join(parts[2:]...))
+		err = walkDirAndClone(wd, singlePath, &convConf)
+		if err != nil {
+			return fmt.Errorf("walking dir and cloning: %w", err)
+		}
+		err = execGoModTidy(singlePath)
+		if err != nil {
+			return fmt.Errorf("executing go mod tidy: %w", err)
+		}
 	}
-	return execGoModTidy(outputPath)
+	return nil
 }
 
 func execGoModTidy(outputPath string) error {
@@ -109,12 +126,12 @@ func execGoModTidy(outputPath string) error {
 	return nil
 }
 
-func walkDirAndClone(wd, outputPath string, vj *convertConfig) error {
-	return fs.WalkDir(templateFiles, "template", func(path string, d fs.DirEntry, err error) error {
-		newPath := filepath.Join(wd, outputPath, strings.TrimPrefix(path, "template/"))
+func walkDirAndClone(wd, outputPath string, vj *SingleConvertConfig) error {
+	return fs.WalkDir(templateFiles, TEMPLATE_DIR, func(path string, d fs.DirEntry, err error) error {
+		newPath := filepath.Join(wd, outputPath, strings.TrimPrefix(path, filepath.Join(TEMPLATE_DIR, "/")))
 
 		switch {
-		case path == "template": // skip the top level template dir
+		case path == TEMPLATE_DIR: // skip the top level template dir
 			return nil
 		case d.IsDir(): // if it is a dir then create it
 			return cloneDir(newPath)
@@ -147,7 +164,7 @@ func openVisionJson(vPath string) (*convertConfig, error) {
 		return nil, fmt.Errorf("reading bytes: %w", err)
 	}
 
-	var jsonData initialise.PluginData
+	var jsonData model.PluginData
 	if err = json.Unmarshal(b, &jsonData); err != nil {
 		return nil, fmt.Errorf("unmarshalling json: %w", err)
 	}
@@ -188,7 +205,7 @@ func cloneFile(src, dst string) error {
 	return err
 }
 
-func cloneExecTmpl(src, dst string, vj *convertConfig) error {
+func cloneExecTmpl(src, dst string, vj *SingleConvertConfig) error {
 	// open file and read it
 	trimmedNewPath := strings.TrimSuffix(dst, filepath.Ext(dst))
 	err := cloneFile(src, trimmedNewPath)

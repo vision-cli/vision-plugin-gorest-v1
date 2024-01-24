@@ -6,7 +6,7 @@ import (
 )
 
 func (s *Server) Routes() error {
-	// special case: handker static content for Chi router with subroute, default go router does not require this step
+	// special case: handler static content for Chi router with subroute, default go router does not require this step
 	contentStatic, err := fs.Sub(fs.FS(static), "static")
 	if err != nil {
 		return err
